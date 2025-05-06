@@ -23,7 +23,7 @@
 
 // Destination port and IP address
 #define UDP_PORT 1234
-#define BEACON_TARGET "172.20.10.2" // after connect to akansha internet //"172.20.10.2"
+#define BEACON_TARGET "172.20.10.4" // after connect to akansha internet //"172.20.10.2"
 
 // Maximum length of our message
 #define BEACON_MSG_LEN_MAX 127
@@ -69,65 +69,72 @@ static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
 }
 
 /*
+This function can be called to send three kinds of information:
+sendOption = 1 ==> GAME_STAUS
+sendOption = 2 ==> GRID_STATE
+sendOption = 3 ==> coord
+*/
+
 static void raw_send(char send_data[], GAME_STATUS status, GRID_STATE state, Coordinate8 coord, int sendOption)
 {
-  //decode information
-  switch(sendOption){
-    case 1:
-      //send Game Status
-      switch (status) {
-        case GAME_STATUS::INITIAL:
-          send_data = "GAMEINITIAL";
-          break;
-        case GAME_STATUS::LEVEL:
-          send_data = "GAMELEVEL";
-          break;
-        case GAME_STATUS::PLACE:
-          send_data = "GAMEPLACE";
-          break;
-
-        case GAME_STATUS::ONGOING:
-          send_data = "GAMEONGOING";
-          break;
-        case GAME_STATUS::WIN:
-          send_data = "GAMEWIN";
-          break;
-        case GAME_STATUS::LOSE:
-          send_data = "GAMELOSE";
-          break;
-      }
+  // decode information
+  switch (sendOption)
+  {
+  case 1:
+    // send Game Status
+    switch (status)
+    {
+    case GAME_STATUS::INITIAL:
+      strcpy(send_data, "GAMEINITIAL");
       break;
-    case 2:
-      //send Grid state
-      switch (state) {
-        case GRID_STATE::WATER:
-          send_data = "GRIDWATER";
-          break;
-        case GRID_STATE::SHIP:
-          send_data = "GRIDSHIP";
-          break;
-        case GRID_STATE::HIT:
-          send_data = "GRIDHIT";
-          break;
-
-        case GRID_STATE::MISS:
-          send_data = "GRIDMISS";
-          break;
-
-      }
+    case GAME_STATUS::LEVEL:
+      strcpy(send_data, "GAMELEVEL");
+      break;
+    case GAME_STATUS::PLACE:
+      strcpy(send_data, "GAMEPLACE");
       break;
 
-    case 3:
-      //send coord (need to encode form coordinates8 to char*)
-      char* out;
-      encodeCoord(coord, out);
-      send_data = out;
+    case GAME_STATUS::ONGOING:
+      strcpy(send_data, "GAMEONGOING");
+      break;
+    case GAME_STATUS::WIN:
+      strcpy(send_data, "GAMEWIN");
+      break;
+    case GAME_STATUS::LOSE:
+      strcpy(send_data, "GAMELOSE");
+      break;
+    }
+    break;
+  case 2:
+    // send Grid state
+    switch (state)
+    {
+    case GRID_STATE::WATER:
+      strcpy(send_data, "GRIDWATER");
+      break;
+    case GRID_STATE::SHIP:
+      strcpy(send_data, "GRIDSHIP");
+      break;
+    case GRID_STATE::HIT:
+      strcpy(send_data, "GRIDHIT");
+      break;
+
+    case GRID_STATE::MISS:
+      strcpy(send_data, "GRIDMISS");
+      break;
+    }
+    break;
+
+  case 3:
+    // send coord (need to encode form coordinates8 to char*)
+    char *out;
+    encodeCoord(coord, out);
+    strcpy(send_data, out);
   }
 
-  PT_SEM_SAFE_SIGNAL(pt, &ready_to_send); //send sephmore
-
+  PT_SEM_SAFE_SIGNAL(pt, &ready_to_send); // send sephmore
 }
-*/
+
 static void raw_send_test()
 {
   sleep_ms(4000);
@@ -140,10 +147,10 @@ static void raw_send_test()
   printf("%s", send_data);
   PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
 
-  sleep_ms(1000);
-  strcpy(send_data, "12344");
-  printf("%s", send_data);
-  PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
+  // sleep_ms(1000);
+  // strcpy(send_data, "12344");
+  // printf("%s", send_data);
+  // PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
 }
 // ===================================
 // Define the recv callback
@@ -179,52 +186,57 @@ void udpecho_raw_init(void)
 }
 
 // This function is a "sudo" function so far since I cannot use enum class in C file
-// void decodeComingMsg(char received_data[], int effective_len)
-// {
+/*
+void decodeComingMsg(char received_data[], int effective_len)
+{
+  if (effective_len <= 3){ // we know received data is  coordinate, we need to check hit or miss
+    Coordinate8 coord;
+    coord = decodeCoord(received_data);
+    printf("Decode msg: coordinate: x = %d, y%d\n", coord.x, coord.y);
+    //decode "A1" style coordinate
+    //check the hit or miss
+    //send back hit or miss msg
+  }
+  else if(strncmp(received_data, "GAME", 4) == 0){
+    // record other player's game status
+    char *status = received_data + 4;
+    if (strcmp(status, "INITIAL") == 0){
+      // status initial
 
-//   if (effective_len <= 3){ // we know received data is  coordinate, we need to check hit or miss
-//     //decode "A1" style coordinate
-//     //check the hit or miss
-//     //send back hit or miss msg
-//   }
-//   else if(strncmp(received_data, "GAME", 4) == 0){
-//     // record other player's game status
-//     char *status = received_data + 4;
-//     if (strcmp(status, "INITIAL") == 0){
-//       // status initial
-//     }
-//     else if(strcmp(status, "LEVEL") == 0){
-//       //LEVEL
-//     }
-//     else if(strcmp(status, "PLACE") == 0){
-//       //place
-//     }
-//     else if(strcmp(status, "ONGOING") == 0){
-//       //ONGOING
-//     }
-//     else if(strcmp(status, "WIN") == 0){
-//       //WIN
-//     }
-//     else {
-//       //LOSE
-//     }
-//   }else{
-//     char *state = received_data + 4;
-//     if (strcmp(state, "WATER") == 0){
-//       // water
-//     }
-//     else if(strcmp(state, "SHIP") == 0){
-//       //ship
-//     }
-//     else if(strcmp(state, "HIT") == 0){
-//       //hit
-//     }
-//     else{
-//       //miss
-//     }
-//   }
+    }
+    else if(strcmp(status, "LEVEL") == 0){
+      //LEVEL
+    }
+    else if(strcmp(status, "PLACE") == 0){
+      //place
+    }
+    else if(strcmp(status, "ONGOING") == 0){
+      //ONGOING
+    }
+    else if(strcmp(status, "WIN") == 0){
+      //WIN
+    }
+    else {
+      //LOSE
+    }
+  }else{
+    char *state = received_data + 4;
+    if (strcmp(state, "WATER") == 0){
+      // water
+    }
+    else if(strcmp(state, "SHIP") == 0){
+      //ship
+    }
+    else if(strcmp(state, "HIT") == 0){
+      //hit
+    }
+    else{
+      //miss
+    }
+  }
 
-// }
+}
+*/
 
 static PT_THREAD(protothread_receive(struct pt *pt))
 {
@@ -315,7 +327,7 @@ static PT_THREAD(protothread_send(struct pt *pt))
     {
       printf("Failed to send UDP packet! error=%d", er);
     }
-    // PT_SEM_SAFE_SIGNAL(pt, &ready_to_send); 
+    // PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
   }
   // End thread
   PT_END(pt);
@@ -350,11 +362,16 @@ int main()
   udpecho_raw_init();
 
   raw_send_test();
+  Coordinate8 coord;
+  coord.x = 2;
+  coord.y = 2;
+  raw_send(send_data, GAME_STATUS::INITIAL, GRID_STATE::SHIP, coord, 1);
+  // raw_send(send_data, GAME_STATUS status, GRID_STATE state, Coordinate8 coord, int sendOption)
 
   // Add threads, start scheduler
   pt_add_thread(protothread_send);
   pt_add_thread(protothread_receive);
-  pt_add_thread(protothread_mainHold);
+  // pt_add_thread(protothread_mainHold);
 
   pt_schedule_start;
 
