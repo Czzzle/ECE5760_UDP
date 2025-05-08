@@ -23,7 +23,7 @@
 
 // Destination port and IP address
 #define UDP_PORT 1234
-#define BEACON_TARGET "172.20.10.3" // after connect to akansha internet //"172.20.10.2"
+#define BEACON_TARGET "172.20.10.4" // after connect to akansha internet //"172.20.10.2"
 
 // Maximum length of our message
 #define BEACON_MSG_LEN_MAX 127
@@ -292,14 +292,14 @@ static PT_THREAD(protothread_send(struct pt *pt))
   while (1)
   {
 
-    PT_SEM_SAFE_WAIT(pt, &ready_to_send);
+    // PT_SEM_SAFE_WAIT(pt, &ready_to_send);
 
     // // Prompt the user
-    // sprintf(pt_serial_out_buffer, "> ");
-    // serial_write;
+    sprintf(pt_serial_out_buffer, "> ");
+    serial_write;
 
-    // // Perform a non-blocking serial read for a string
-    // serial_read;
+    // Perform a non-blocking serial read for a string
+    serial_read;
 
     // Allocate a PBUF
     struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX + 1, PBUF_RAM);
@@ -311,8 +311,11 @@ static PT_THREAD(protothread_send(struct pt *pt))
     memset(req, 0, BEACON_MSG_LEN_MAX + 1);
 
     // Fill the pbuf payload
+    // snprintf(req, BEACON_MSG_LEN_MAX, "%s: %s \n",
+    //          ip4addr_ntoa(netif_ip_addr4(netif_default)), pt_serial_in_buffer);
+
     snprintf(req, BEACON_MSG_LEN_MAX, "%s: %s \n",
-             ip4addr_ntoa(netif_ip_addr4(netif_default)), send_data);
+              ip4addr_ntoa(netif_ip_addr4(netif_default)), send_data);
 
     // Send the UDP packet
     err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
@@ -361,11 +364,11 @@ int main()
   // UDP recenve ISR routines
   udpecho_raw_init();
 
-  raw_send_test();
+  // raw_send_test();
   Coordinate8 coord;
   coord.x = 2;
   coord.y = 2;
-  raw_send(send_data, GAME_STATUS::INITIAL, GRID_STATE::SHIP, coord, 1);
+  raw_send(send_data, GAME_STATUS::ONGOING,GRID_STATE::SHIP, coord, 1);
   // raw_send(send_data, GAME_STATUS status, GRID_STATE state, Coordinate8 coord, int sendOption)
 
   // Add threads, start scheduler
