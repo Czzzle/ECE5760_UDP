@@ -432,7 +432,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             // Check if we're within the grid (i.e., not the sentinel value 30,30)
             if (yellow_button_state && prev_yellow_button_state && !(grid_pos.x == 30 && grid_pos.y == 30))
             {
-              
+              dma_start_channel_mask(1u << ctrl_chan_boom);
               char encoded[4]; // Enough space for something like "A10" + null terminator
               encodeCoord(grid_pos, encoded);
               printf("\nEncoded:%c %c, VAL_SHIP:%d", encoded[0], encoded[1], val_ship - 1);
@@ -549,7 +549,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
 
           else if (opponent_gridstate == GRID_STATE::MISS)
           {
-            // dma_start_channel_mask(1u << ctrl_chan_splash);
+            dma_start_channel_mask(1u << ctrl_chan_splash);
             drawPegMissRight((int)grid_pos.x, (int)grid_pos.y);
             moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
           }
@@ -756,13 +756,13 @@ int main()
   // (X/Y)*sys_clk, where X is the first 16 bytes and Y is the second
   // sys_clk is 125 MHz unless changed in code. Configured to ~44 kHz
   // dma_timer_set_fraction(0, 0x0017, 0xffff);
-  dma_timer_set_fraction(1, 0x005, 0XDf00); // ~11025Hz
+  dma_timer_set_fraction(0, 0x005, 0XDf00); // ~11025Hz
   // dma_timer_set_fraction(1, 0x005, 0XDf00); // 16kHz
 
   // 0x3b means timer0 (see SDK manual)
-  channel_config_set_dreq(&c9,0x3d);// 0x3d); // DREQ paced by timer 1
+  channel_config_set_dreq(&c9,0x3b); 0x3d); // DREQ paced by timer 1
   // chain to the controller DMA channel
-  // channel_config_set_chain_to(&c9, ctrl_chan_splash); // Chain to control channel
+  // channel_config_set_chain_to(&c2, ctrl_chan); // Chain to control channel
 
   dma_channel_configure(
       data_chan_splash,          // Channel to be configured
@@ -820,8 +820,6 @@ int main()
       boom_audio_len,            // Number of transfers
       false                      // Don't start immediately.
   );
-
-  // dma_start_channel_mask(1u << ctrl_chan_splash);
 
   multicore_reset_core1();
   multicore_launch_core1(&core1_main);

@@ -29,6 +29,7 @@ enum PlayerState
 PlayerState my_state = RA;
 PlayerState opponent_state = YT;
 
+
 // =================== declare DMA chains =========
 int data_chan_boom;
 int ctrl_chan_boom;
@@ -432,7 +433,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             // Check if we're within the grid (i.e., not the sentinel value 30,30)
             if (yellow_button_state && prev_yellow_button_state && !(grid_pos.x == 30 && grid_pos.y == 30))
             {
-              
               char encoded[4]; // Enough space for something like "A10" + null terminator
               encodeCoord(grid_pos, encoded);
               printf("\nEncoded:%c %c, VAL_SHIP:%d", encoded[0], encoded[1], val_ship - 1);
@@ -549,7 +549,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
 
           else if (opponent_gridstate == GRID_STATE::MISS)
           {
-            // dma_start_channel_mask(1u << ctrl_chan_splash);
+            dma_start_channel_mask(1u << ctrl_chan_splash);
             drawPegMissRight((int)grid_pos.x, (int)grid_pos.y);
             moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
           }
@@ -577,25 +577,22 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           }
         }
       }
-      else if (opponent_player == GAME_STATUS::LOSE)
-      {
-        playerBoard.game_status = GAME_STATUS::WIN;
-        fillRect(0, 0, 320, 240, BLACK);
-        winnerDeclare(YELLOW);
-        break;
-      }
       else
       {
         raw_send(GAME_STATUS::ONGOING, GRID_STATE::WATER, posn, 1);
       }
     }
-
+    else if (opponent_player == GAME_STATUS::LOSE)
+    {
+      playerBoard.game_status = GAME_STATUS::WIN;
+      fillRect(0, 0, 320, 240, BLACK);
+      winnerDeclare(YELLOW);
+    }
     else if (playerBoard.game_status == GAME_STATUS::LOSE)
     {
       raw_send(GAME_STATUS::LOSE, GRID_STATE::HIT, {30, 30}, 1);
       fillRect(0, 0, 320, 240, BLACK);
       loserDeclare(WHITE);
-      break;
     }
 
     spare_time = FRAME_RATE - (time_us_32() - begin_time);
@@ -709,72 +706,70 @@ int main()
   int i;
   for (i = 0; i < (sine_table_size); i++)
   {
-    raw_sin[i] = (int)(2047 * sin((float)i * 6.283 / (float)sine_table_size) + 2047); // 12 bit
-    DAC_data[i] = DAC_config_chan_A | (raw_sin[i] & 0x0fff);
+      raw_sin[i] = (int)(2047 * sin((float)i * 6.283 / (float)sine_table_size) + 2047); // 12 bit
+      DAC_data[i] = DAC_config_chan_A | (raw_sin[i] & 0x0fff);
   }
 
   int k;
-  for (k = 0; k < splash_audio_len; k++)
-  {
-    splash_data[k] = DAC_config_chan_A | (splash_audio[k] & 0x0FFF); // first convert to 12 bit then add config
+  for (k = 0; k< splash_audio_len; k++){
+      splash_data[k] = DAC_config_chan_A | (splash_audio[k] & 0x0FFF); //first convert to 12 bit then add config
   }
 
   int j;
-  for (j = 0; j < boom_audio_len; j++)
-  {
-    boom_data[j] = DAC_config_chan_A | (boom_audio[j] & 0x0FFF); // first convert to 12 bit then add config
+  for (j = 0; j< boom_audio_len;j++){
+      boom_data[j] = DAC_config_chan_A | (boom_audio[j] & 0x0FFF); //first convert to 12 bit then add config
   }
 
-  // SPLASH
-  //  Select DMA channels
+  //SPLASH
+  // Select DMA channels
   data_chan_splash = dma_claim_unused_channel(true);
   ;
   ctrl_chan_splash = dma_claim_unused_channel(true);
   ;
 
   // Setup the control channel
-  dma_channel_config c8 = dma_channel_get_default_config(ctrl_chan_splash); // default configs
-  channel_config_set_transfer_data_size(&c8, DMA_SIZE_32);                  // 32-bit txfers
-  channel_config_set_read_increment(&c8, false);                            // no read incrementing
-  channel_config_set_write_increment(&c8, false);                           // no write incrementing
-  channel_config_set_chain_to(&c8, data_chan_splash);                       // chain to data channel
+  dma_channel_config c4 = dma_channel_get_default_config(ctrl_chan_splash); // default configs
+  channel_config_set_transfer_data_size(&c4, DMA_SIZE_32);           // 32-bit txfers
+  channel_config_set_read_increment(&c4, false);                     // no read incrementing
+  channel_config_set_write_increment(&c4, false);                    // no write incrementing
+  channel_config_set_chain_to(&c4, data_chan_splash);                       // chain to data channel
 
   dma_channel_configure(
       ctrl_chan_splash,                        // Channel to be configured
-      &c8,                                     // The configuration we just created
+      &c4,                               // The configuration we just created
       &dma_hw->ch[data_chan_splash].read_addr, // Write address (data channel read address)
-      &splash_pointer,                         // Read address (POINTER TO AN ADDRESS)
-      1,                                       // Number of transfers
-      false                                    // Don't start immediately
+      &splash_pointer,                 // Read address (POINTER TO AN ADDRESS)
+      1,                                // Number of transfers
+      false                             // Don't start immediately
   );
-
+ 
   // Setup the data channel
-  dma_channel_config c9 = dma_channel_get_default_config(data_chan_splash); // Default configs
-  channel_config_set_transfer_data_size(&c9, DMA_SIZE_16);                  // 16-bit txfers
-  channel_config_set_read_increment(&c9, true);                             // yes read incrementing
-  channel_config_set_write_increment(&c9, false);                           // no write incrementing
+  dma_channel_config c5 = dma_channel_get_default_config(data_chan_splash); // Default configs
+  channel_config_set_transfer_data_size(&c5, DMA_SIZE_16);           // 16-bit txfers
+  channel_config_set_read_increment(&c5, true);                      // yes read incrementing
+  channel_config_set_write_increment(&c5, false);                    // no write incrementing
   // (X/Y)*sys_clk, where X is the first 16 bytes and Y is the second
   // sys_clk is 125 MHz unless changed in code. Configured to ~44 kHz
   // dma_timer_set_fraction(0, 0x0017, 0xffff);
-  dma_timer_set_fraction(1, 0x005, 0XDf00); // ~11025Hz
+ dma_timer_set_fraction(1, 0x005, 0XDf00); // ~11025Hz
   // dma_timer_set_fraction(1, 0x005, 0XDf00); // 16kHz
 
   // 0x3b means timer0 (see SDK manual)
-  channel_config_set_dreq(&c9,0x3d);// 0x3d); // DREQ paced by timer 1
+  channel_config_set_dreq(&c5, 0x3d); // DREQ paced by timer 1
   // chain to the controller DMA channel
-  // channel_config_set_chain_to(&c9, ctrl_chan_splash); // Chain to control channel
+  // channel_config_set_chain_to(&c2, ctrl_chan); // Chain to control channel
 
   dma_channel_configure(
-      data_chan_splash,          // Channel to be configured
-      &c9,                       // The configuration we just created
+      data_chan_splash,                 // Channel to be configured
+      &c5,                       // The configuration we just created
       &spi_get_hw(SPI_PORT)->dr, // write address (SPI data register)
-      splash_data,               // The initial read address
-      splash_audio_len,          // Number of transfers
+      splash_data,                  // The initial read address
+      splash_audio_len,           // Number of transfers
       false                      // Don't start immediately.
   );
-
-  // BOOM
-  //  Select DMA channels
+ 
+  //BOOM
+  // Select DMA channels
   data_chan_boom = dma_claim_unused_channel(true);
   ;
   ctrl_chan_boom = dma_claim_unused_channel(true);
@@ -782,30 +777,30 @@ int main()
 
   // Setup the control channel
   dma_channel_config c6 = dma_channel_get_default_config(ctrl_chan_boom); // default configs
-  channel_config_set_transfer_data_size(&c6, DMA_SIZE_32);                // 32-bit txfers
-  channel_config_set_read_increment(&c6, false);                          // no read incrementing
-  channel_config_set_write_increment(&c6, false);                         // no write incrementing
+  channel_config_set_transfer_data_size(&c6, DMA_SIZE_32);           // 32-bit txfers
+  channel_config_set_read_increment(&c6, false);                     // no read incrementing
+  channel_config_set_write_increment(&c6, false);                    // no write incrementing
   channel_config_set_chain_to(&c6, data_chan_boom);                       // chain to data channel
 
   dma_channel_configure(
       ctrl_chan_boom,                        // Channel to be configured
-      &c6,                                   // The configuration we just created
+      &c6,                               // The configuration we just created
       &dma_hw->ch[data_chan_boom].read_addr, // Write address (data channel read address)
-      &boom_pointer,                         // Read address (POINTER TO AN ADDRESS)
-      1,                                     // Number of transfers
-      false                                  // Don't start immediately
+      &boom_pointer,                 // Read address (POINTER TO AN ADDRESS)
+      1,                                // Number of transfers
+      false                             // Don't start immediately
   );
 
   // Setup the data channel
   dma_channel_config c7 = dma_channel_get_default_config(data_chan_boom); // Default configs
-  channel_config_set_transfer_data_size(&c7, DMA_SIZE_16);                // 16-bit txfers
-  channel_config_set_read_increment(&c7, true);                           // yes read incrementing
-  channel_config_set_write_increment(&c7, false);                         // no write incrementing
+  channel_config_set_transfer_data_size(&c7, DMA_SIZE_16);           // 16-bit txfers
+  channel_config_set_read_increment(&c7, true);                      // yes read incrementing
+  channel_config_set_write_increment(&c7, false);                    // no write incrementing
   // (X/Y)*sys_clk, where X is the first 16 bytes and Y is the second
   // sys_clk is 125 MHz unless changed in code. Configured to ~44 kHz
   // dma_timer_set_fraction(0, 0x0017, 0xffff);
   //  dma_timer_set_fraction(0, 0x005, 0XDf00); // ~11025Hz
-  dma_timer_set_fraction(0, 0x0008, 0xf500); // 16kHz
+  dma_timer_set_fraction(0,0x0008, 0xf500); // 16kHz
 
   // 0x3b means timer0 (see SDK manual)
   channel_config_set_dreq(&c7, 0x3b); // DREQ paced by timer 0
@@ -813,16 +808,14 @@ int main()
   // channel_config_set_chain_to(&c2, ctrl_chan); // Chain to control channel
 
   dma_channel_configure(
-      data_chan_boom,            // Channel to be configured
+      data_chan_boom,                 // Channel to be configured
       &c7,                       // The configuration we just created
       &spi_get_hw(SPI_PORT)->dr, // write address (SPI data register)
-      boom_data,                 // The initial read address
-      boom_audio_len,            // Number of transfers
+      boom_data,                  // The initial read address
+      boom_audio_len,           // Number of transfers
       false                      // Don't start immediately.
   );
-
-  // dma_start_channel_mask(1u << ctrl_chan_splash);
-
+  
   multicore_reset_core1();
   multicore_launch_core1(&core1_main);
 

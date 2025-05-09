@@ -549,7 +549,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
 
           else if (opponent_gridstate == GRID_STATE::MISS)
           {
-            // dma_start_channel_mask(1u << ctrl_chan_splash);
+            dma_start_channel_mask(1u << ctrl_chan_splash);
             drawPegMissRight((int)grid_pos.x, (int)grid_pos.y);
             moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
           }
@@ -821,7 +821,7 @@ int main()
       false                      // Don't start immediately.
   );
 
-  // dma_start_channel_mask(1u << ctrl_chan_splash);
+  dma_start_channel_mask(1u << ctrl_chan_splash);
 
   multicore_reset_core1();
   multicore_launch_core1(&core1_main);

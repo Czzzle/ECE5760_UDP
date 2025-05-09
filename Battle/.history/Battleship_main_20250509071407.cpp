@@ -821,7 +821,7 @@ int main()
       false                      // Don't start immediately.
   );
 
-  // dma_start_channel_mask(1u << ctrl_chan_splash);
+  dma_start_channel_mask(1u << ctrl_chan_splash);
 
   multicore_reset_core1();
   multicore_launch_core1(&core1_main);
