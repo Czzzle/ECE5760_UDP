@@ -461,7 +461,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           playerBoard.game_status = GAME_STATUS::ONGOING;
           printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
           drawTextforShip(BLACK, BLACK, 1);
-          drawBoxforStartGame(BLACK);
 
           moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
 

@@ -68,11 +68,13 @@ void wrapCursor(fix15 *x_pos, fix15 *y_pos)
   // Wrap around horizontally
   if (*x_pos > int2fix15(SCREEN_WIDTH))
   {
-    *x_pos = int2fix15(0);
+    // *x_pos = int2fix15(0);
+    *x_pos = int2fix15(SCREEN_WIDTH);
   }
   else if (*x_pos < int2fix15(0))
   {
     *x_pos = int2fix15(SCREEN_WIDTH);
+    
   }
 
   // Wrap around vertically
@@ -461,7 +463,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           playerBoard.game_status = GAME_STATUS::ONGOING;
           printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
           drawTextforShip(BLACK, BLACK, 1);
-          drawBoxforStartGame(BLACK);
 
           moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
 

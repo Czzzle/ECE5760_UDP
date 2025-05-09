@@ -463,14 +463,14 @@ void drawBoxforShip(char color, int pos_x, int pos_y, const char *strin)
     writeString(shipslist);
 }
 
-void drawBoxforStartGame(char bgColor)
+void drawStartGame(char bgColor)
 {
     static char shipslist[50];
     fillRect(START_GAME_X - 1, START_GAME_Y - 3, 120, 20, bgColor);
     setCursor(START_GAME_X, START_GAME_Y);
     setTextSize(1);
     setTextColor(BLACK); // default is white but not very easy to see
-    sprintf(shipslist, "START GAME");
+    sprintf(shipslist, stri"START GAME"n);
     writeString(shipslist);
 }
 

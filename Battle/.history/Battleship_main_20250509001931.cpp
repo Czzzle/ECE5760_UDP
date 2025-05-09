@@ -348,7 +348,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             printf("pass through\n");
             if (val_ship == 1)
             {
-              shipname = "Carrier    (5)";
+              shipname = "Carrier";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Carrier, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -360,7 +360,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             else if (val_ship == 2)
             {
               printf("select batteship");
-              shipname = "Battleship (4)";
+              shipname = "Batteship";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Battleship, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -371,7 +371,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 3)
             {
-              shipname = "Cruiser    (3)";
+              shipname = "Cruiser";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Cruiser, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -382,7 +382,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 4)
             {
-              shipname = "Submarine  (3)";
+              shipname = "Submarine";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Submarine, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -393,7 +393,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 5)
             {
-              shipname = "Destroyer  (2)";
+              shipname = "Destroyer";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Destroyer, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -461,10 +461,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           playerBoard.game_status = GAME_STATUS::ONGOING;
           printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
           drawTextforShip(BLACK, BLACK, 1);
-          drawBoxforStartGame(BLACK);
-
-          moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
-
           drawBlackBoxforShip();
           drawGRID(BOARD_SIZE, RIGHT_GRID_X, RIGHT_GRID_Y, GRID_OUTLINE, BLUE);
           drawGridDim(RIGHT_GRID_X, RIGHT_GRID_Y, WHITE);
@@ -513,7 +509,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             // drawPEG(grid_pos.x, grid_pos.y, BLACK);
             drawPegPotentialShip(grid_pos.x, grid_pos.y);
             moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
-
+            
             printf("\nEntered send attack segment");
             raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, grid_pos, 3);
             your_turn = false;

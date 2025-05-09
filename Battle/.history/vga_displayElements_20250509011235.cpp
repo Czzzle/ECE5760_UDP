@@ -463,7 +463,7 @@ void drawBoxforShip(char color, int pos_x, int pos_y, const char *strin)
     writeString(shipslist);
 }
 
-void drawBoxforStartGame(char bgColor)
+void drawStartGame(char bgColor)
 {
     static char shipslist[50];
     fillRect(START_GAME_X - 1, START_GAME_Y - 3, 120, 20, bgColor);

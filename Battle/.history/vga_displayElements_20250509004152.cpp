@@ -369,7 +369,7 @@ uint8_t checkCursorOverLevel(int x_pos, int y_pos)
 
 bool checkCursorOverStartGame(int x_pos, int y_pos)
 {
-    if (x_pos >= START_GAME_X && x_pos <= START_GAME_X + 120 && y_pos >= START_GAME_Y && y_pos <= START_GAME_Y + 20)
+    if (x_pos >= EASY_BUTTON_X && x_pos <= EASY_BUTTON_X + START_BUTTON_WIDTH && y_pos >= EASY_BUTTON_Y && y_pos <= EASY_BUTTON_Y + START_BUTTON_HEIGHT)
         return true;
     else
         return false;
@@ -420,7 +420,7 @@ void drawTextforShip(char textColor, char optionColor, int isShow)
     sprintf(shipslist, "Destroyer  (2)");
     writeString(shipslist);
 
-    setCursor(20, EASY_BUTTON_Y);
+    setCursor(30, EASY_BUTTON_Y);
     setTextColor(optionColor);
     setTextSize(2);
     static char option1[50];
@@ -455,33 +455,21 @@ uint8_t checkCursorOverShip(int x_pos, int y_pos)
 void drawBoxforShip(char color, int pos_x, int pos_y, const char *strin)
 {
     static char shipslist[50];
-    fillRect(pos_x - 1, pos_y - 3, 118, 13, color);
+    fillRect(pos_x - 1, pos_y - 3, 120, 13, color);
     setCursor(pos_x, pos_y);
     setTextSize(1);
-    setTextColor(BLACK); // default is white but not very easy to see
     sprintf(shipslist, strin);
-    writeString(shipslist);
-}
-
-void drawBoxforStartGame(char bgColor)
-{
-    static char shipslist[50];
-    fillRect(START_GAME_X - 1, START_GAME_Y - 3, 120, 20, bgColor);
-    setCursor(START_GAME_X, START_GAME_Y);
-    setTextSize(1);
-    setTextColor(BLACK); // default is white but not very easy to see
-    sprintf(shipslist, "START GAME");
     writeString(shipslist);
 }
 
 void drawBlackBoxforShip()
 {
-    fillRect(RIGHT_GRID_X - 1, RIGHT_GRID_Y - 3, 118, 13, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Carrier - 3, 118, 13, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Battleship - 3, 118, 13, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Cruiser - 3, 118, 13, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Submarine - 3, 118, 13, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Destroyer - 3, 118, 13, BLACK);
+    fillRect(RIGHT_GRID_X - 1, RIGHT_GRID_Y - 3, RIGHT_GRID_X - 3, 17, BLACK);
+    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Carrier - 3, RIGHT_GRID_X - 3, 17, BLACK);
+    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Battleship - 1, RIGHT_GRID_X - 3, 17, BLACK);
+    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Cruiser - 1, RIGHT_GRID_X - 3, 17, BLACK);
+    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Submarine - 1, RIGHT_GRID_X - 3, 17, BLACK);
+    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Destroyer - 1, RIGHT_GRID_X - 3, 17, BLACK);
 }
 /*
 This function is to display waiting for difficulty selection page.

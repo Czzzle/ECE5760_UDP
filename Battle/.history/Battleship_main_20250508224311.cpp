@@ -222,6 +222,284 @@ static void button_irq(void)
 // ==================================================
 // === Animation Thread
 // ==================================================
+
+/*
+// Animation on core 0
+static PT_THREAD(protothread_anim(struct pt *pt))
+{
+  // Mark beginning of thread
+  PT_BEGIN(pt);
+
+    static int begin_time;
+    static int spare_time;
+
+    static char buffer1[50];
+
+    spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy); // Spawn a boid
+    // drawCursor(fix2int15(cursorpos_x), fix2int15(cursorpos_y), color);
+    moveCursor(&cursorpos_prev_x, &cursorpos_prev_y, cursorpos_x, cursorpos_y, color);
+    // savePrevPixels(fix2int15(cursorpos_x), fix2int15(cursorpos_y));
+    // cursorpos_prev_x = cursorpos_x;
+    // cursorpos_prev_y = cursorpos_y;
+
+    uint8_t prev_val = 0;
+    uint8_t val_ship = 0;
+    bool select_flag = false;
+    uint8_t ctr_ship = 0;
+    int ctr_button =0;
+    static bool prev_left_button_state = false;
+    bool curr_left_button_state = false;
+    static bool prev_right_button_state = false;
+    bool curr_right_button_state = false;
+
+    // PT_SEM_SAFE_WAIT(pt, &new_message);
+
+    while(1) {
+      // Measure time at start of thread
+      begin_time = time_us_32() ;
+      //LED on
+      // gpio_put(LED_PIN, !gpio_get(LED_PIN));
+      checkPOS(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+      // printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
+      wrapCursor(&cursorpos_x, &cursorpos_y);
+
+      if (cursorpos_prev_x != cursorpos_x | cursorpos_prev_y != cursorpos_y) {
+        void drawBoundary();
+        printf("\nOpponentGame Status %d", oponent_player);
+
+        fillRect(10, SCREEN_HEIGHT-10, 100, 10, BLACK);
+        sprintf(buffer1, "x: %d, y: %d", fix2int15(cursorpos_x), fix2int15(cursorpos_y));
+        setCursor(10, SCREEN_HEIGHT-10);
+        setTextColor(WHITE);
+        setTextSize(1);
+        writeString(buffer1);
+
+        // drawCursor(fix2int15(cursorpos_prev_x), fix2int15(cursorpos_prev_y), BLACK);
+        // cursorpos_prev_x = cursorpos_x;
+        // cursorpos_prev_y = cursorpos_y;
+        // moveCursor(&cursorpos_prev_x, &cursorpos_prev_y, cursorpos_x, cursorpos_y, color);
+
+        int intcursor_x = fix2int15(cursorpos_x);
+        int intcursor_y = fix2int15(cursorpos_y);
+
+        if(playerBoard.game_status==GAME_STATUS::INITIAL)
+        {
+
+          if(checkCursorOverStartButton(intcursor_x, intcursor_y))
+          {
+            printf("\nReached here");
+            // if(prev_left_button_state == curr_left_button_state)
+            if(yellow_pressed)
+            {
+              printf("\nButtonloop");
+              welcomeText(BLACK);
+              // change the prev cursor pixel to be all black
+              savePrevPixels(cursorpos_x, cursorpos_y);
+
+              playerBoard.game_status = GAME_STATUS::LEVEL;
+              difficultyChoose(YELLOW, RED, 0, 1);
+              printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
+            }
+          }
+
+          printf("yellow: %b\n", yellow_pressed);
+          if(yellow_pressed)
+          {
+            printf("\nButtonloop");
+            welcomeText(BLACK);
+            // change the prev cursor pixel to be all black
+            savePrevPixels(cursorpos_x, cursorpos_y);
+
+            playerBoard.game_status = GAME_STATUS::LEVEL;
+            difficultyChoose(YELLOW, RED, 0, 1);
+            printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
+          }
+        }
+        else if(playerBoard.game_status==GAME_STATUS::LEVEL)
+        {
+          uint8_t val = checkCursorOverLevel(intcursor_x, intcursor_y);
+          if(prev_left_button_state == curr_left_button_state)
+          {
+            if(val!=0)
+            {
+              difficultyChoose(YELLOW, BLUE, 0, 0);
+              playerBoard.game_status = GAME_STATUS::PLACE;
+              // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+              drawGRID(BOARD_SIZE, LEFT_GRID_X, LEFT_GRID_Y, GRID_OUTLINE, BLUE);
+              drawGridDim(LEFT_GRID_X, LEFT_GRID_Y, WHITE);
+              drawTextforShip(YELLOW, BLUE, 1);
+              printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
+            }
+          }
+        }
+        else if(playerBoard.game_status==GAME_STATUS::PLACE)
+        {
+          const char* shipname;
+          if(ctr_ship!=5)
+          {
+            if(select_flag == false)
+            {
+              val_ship = checkCursorOverShip(intcursor_x, intcursor_y);
+              if(val_ship!=0 && prev_val!=val_ship && prev_left_button_state==curr_left_button_state)
+              {
+                if(val_ship==1)
+                {
+                  shipname = "Carrier";
+                  drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Carrier, shipname);
+                  prev_val = val_ship;
+                  select_flag = true;
+                  // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+                }
+                else if(val_ship==2)
+                {
+                  shipname = "Batteship";
+                  drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Battleship, shipname);
+                  prev_val = val_ship;
+                  select_flag = true;
+                  // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+                }
+                else if(val_ship==3)
+                {
+                  shipname = "Cruiser";
+                  drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Cruiser, shipname);
+                  prev_val = val_ship;
+                  select_flag = true;
+                  // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+                }
+                else if(val_ship==4)
+                {
+                  shipname = "Submarine";
+                  drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Submarine, shipname);
+                  prev_val = val_ship;
+                  select_flag = true;
+                  // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+                }
+                else if(val_ship==5)
+                {
+                  shipname = "Destroyer";
+                  drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Destroyer, shipname);
+                  prev_val = val_ship;
+                  select_flag = true;
+                  // spawnCursor(&cursorpos_x, &cursorpos_y, &cursorpos_cx, &cursorpos_cy);
+                }
+              }
+            }
+            else if(select_flag)
+            {
+              if(val_ship!=0)
+              {
+                Coordinate8 grid_pos = isInMYGRID(intcursor_x, intcursor_y);
+                printf("prev:%x, curr:%x",prev_right_button_state,curr_right_button_state);
+
+                // Check if we're within the grid (i.e., not the sentinel value 30,30)
+                if (prev_left_button_state==curr_left_button_state && !(grid_pos.x == 30 && grid_pos.y == 30))
+                {
+                  char encoded[4];  // Enough space for something like "A10" + null terminator
+                  encodeCoord(grid_pos, encoded);
+                  printf("\nEncoded:%c %c, VAL_SHIP:%d", encoded[0],encoded[1], val_ship-1);
+                  bool success = playerBoard.place_ship(SHIP_TYPE(val_ship-1), SHIP_ORIENTATION::HORIZONTAL, grid_pos);
+
+                  if (success) {
+                    ctr_ship++;                  // Increase placed ship counter
+                    select_flag = false;        // Reset flag to allow next ship to be selected
+                    printf("Ship placed successfully at %d,%d\n", grid_pos.x, grid_pos.y);
+                  }
+                  else  printf("Invalid position. Try again.\n");
+                }
+                // Check if we're within the grid (i.e., not the sentinel value 30,30)
+                else if (prev_right_button_state==curr_right_button_state && !(grid_pos.x == 30 && grid_pos.y == 30))
+                {
+                  char encoded[4];  // Enough space for something like "A10" + null terminator
+                  encodeCoord(grid_pos, encoded);
+                  printf("\nEncoded:%c %c, VAL_SHIP:%d", encoded[0],encoded[1], val_ship-1);
+                  bool success = playerBoard.place_ship(SHIP_TYPE(val_ship-1), SHIP_ORIENTATION::VERTICAL, grid_pos);
+
+                  if (success) {
+                    ctr_ship++;                  // Increase placed ship counter
+                    select_flag = false;        // Reset flag to allow next ship to be selected
+                    printf("Ship placed successfully at %d,%d\n", grid_pos.x, grid_pos.y);
+                  }
+                  else  printf("Invalid position. Try again.\n");
+                }
+              }
+            }
+          }
+          else
+          {
+            printf("\nReached here finish placement");
+            if(checkCursorOverStartGame(intcursor_x, intcursor_y) && prev_left_button_state==curr_left_button_state)
+            {
+              playerBoard.game_status=GAME_STATUS::ONGOING;
+              printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
+              drawTextforShip(BLACK,BLACK,1);
+              drawBlackBoxforShip();
+              drawGRID(BOARD_SIZE, RIGHT_GRID_X, RIGHT_GRID_Y, GRID_OUTLINE, BLUE);
+              drawGridDim(RIGHT_GRID_X, RIGHT_GRID_Y, WHITE);
+
+            }
+          }
+        }
+        else if(playerBoard.game_status==GAME_STATUS::ONGOING)
+        {
+          // printf("\nOpponentGame Status %d", oponent_player);
+          printf("\nTURN:%x, RESPONSE:%x, ATTACK:%x", your_turn, received_response, received_attack);
+          Coordinate8 posn;
+          posn.x = uint8_t(intcursor_x);
+          posn.y = uint8_t(intcursor_y);
+          if(oponent_player==GAME_STATUS::ONGOING)
+          {
+            Coordinate8 grid_pos = isInOtherGRID(intcursor_x, intcursor_y);
+            // PRINT HERE TURN RESULT ALSO
+            if(your_turn) {
+              if(!(grid_pos.x == 30 && grid_pos.y == 30) && prev_left_button_state==curr_left_button_state)
+              {
+                drawPEG(grid_pos.x, grid_pos.y, BLACK);
+                printf("\nEntered send attack segment");
+                raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, grid_pos, 3);
+                your_turn = false;
+                received_response = true;
+              }
+            }
+            else if(received_response)
+            {
+              if(opponent_gridstate==GRID_STATE::HIT)
+                drawPegHit((int)grid_pos.x, (int)grid_pos.y);
+              else if(opponent_gridstate==GRID_STATE::MISS)
+                drawPegMiss((int)grid_pos.x, (int)grid_pos.y);
+                received_response = false;
+                received_attack = true;
+              // else if(opponent_gridstate==GRID_STATE::REPEAT)
+            }
+            else if(received_attack) {
+                GRID_STATE my_GRID = playerBoard.attack(our_shippos);
+                if(playerBoard.all_ships_sunk())
+                  raw_send(GAME_STATUS::WIN, GRID_STATE::HIT,posn, 1);
+                else
+                {
+                  raw_send(GAME_STATUS::ONGOING, my_GRID, posn, 2);
+                }
+                received_attack = false;
+                your_turn = true;
+            }
+          }
+          else {
+            raw_send(GAME_STATUS::ONGOING, GRID_STATE::WATER, posn, 1);
+          }
+          // (GAME_STATUS status, GRID_STATE state, Coordinate8 coord, int sendOption)
+        }
+
+        moveCursor(&cursorpos_prev_x, &cursorpos_prev_y, cursorpos_x, cursorpos_y, color);
+
+      } // End if cursor moved
+
+      drawCursor(fix2int15(cursorpos_x), fix2int15(cursorpos_y), color); // draw the boid at its new position
+
+      spare_time = FRAME_RATE - (time_us_32() - begin_time) ;
+    } // END WHILE(1)
+  PT_END(pt);
+
+} // animation thread
+*/
 int intcursor_x;
 int intcursor_y;
 
@@ -348,7 +626,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             printf("pass through\n");
             if (val_ship == 1)
             {
-              shipname = "Carrier    (5)";
+              shipname = "Carrier";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Carrier, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -360,7 +638,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             else if (val_ship == 2)
             {
               printf("select batteship");
-              shipname = "Battleship (4)";
+              shipname = "Batteship";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Battleship, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -371,7 +649,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 3)
             {
-              shipname = "Cruiser    (3)";
+              shipname = "Cruiser";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Cruiser, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -382,7 +660,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 4)
             {
-              shipname = "Submarine  (3)";
+              shipname = "Submarine";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Submarine, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -393,7 +671,7 @@ static PT_THREAD(protothread_anim(struct pt *pt))
             }
             else if (val_ship == 5)
             {
-              shipname = "Destroyer  (2)";
+              shipname = "Destroyer";
               drawBoxforShip(RED, RIGHT_GRID_X, SHIPLIST_SPACE_Destroyer, shipname);
 
               moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
@@ -461,10 +739,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           playerBoard.game_status = GAME_STATUS::ONGOING;
           printf("\nGAME_STATUS: %d", playerBoard.game_status_check());
           drawTextforShip(BLACK, BLACK, 1);
-          drawBoxforStartGame(BLACK);
-
-          moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
-
           drawBlackBoxforShip();
           drawGRID(BOARD_SIZE, RIGHT_GRID_X, RIGHT_GRID_Y, GRID_OUTLINE, BLUE);
           drawGridDim(RIGHT_GRID_X, RIGHT_GRID_Y, WHITE);
@@ -512,8 +786,6 @@ static PT_THREAD(protothread_anim(struct pt *pt))
           {
             // drawPEG(grid_pos.x, grid_pos.y, BLACK);
             drawPegPotentialShip(grid_pos.x, grid_pos.y);
-            moveCursor(&cursorpos_x, &cursorpos_y, cursorpos_x, cursorpos_y, color);
-
             printf("\nEntered send attack segment");
             raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, grid_pos, 3);
             your_turn = false;

@@ -53,8 +53,7 @@
 #define SHIPLIST_SPACE_Submarine RIGHT_GRID_Y + 120
 #define SHIPLIST_SPACE_Destroyer RIGHT_GRID_Y + 150
 
-#define START_GAME_X 20
-#define START_GAME_Y EASY_BUTTON_Y
+#define START_GAME
 
 #define CURSOR_SIZE 9
 
@@ -85,7 +84,6 @@ void drawPegShip(int x, int y);
 void drawPegPotentialShip(int x, int y);
 void drawTextforShip(char textColor, char optionColor, int isShow);
 void drawBoxforShip(char color, int pos_x, int pos_y, const char* strin);
-void drawBoxforStartGame(char bgColor);
 void drawBlackBoxforShip();
 
 // Page 4 - Game
