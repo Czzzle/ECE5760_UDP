@@ -41,7 +41,7 @@ def wav_to_c_array(wav_filename):
             if (i + 1) % 12 == 0:
                 f.write("\n")
         f.write("\n};\n")
-        f.write(f"const uint32_t {array_name}_audio_len = {len(rescaled_data)};\n")
+        f.write(f"#define {array_name}_audio_len = {len(rescaled_data)};\n")
     print(f"Generated {output_filename}")
 
 # Process all .wav files in the current directory

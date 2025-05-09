@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Audio_DMA_Demo dma-demo.c)
+add_executable(Audio_DMA_Demo dma-demo.cpp)
 
 target_link_libraries(Audio_DMA_Demo pico_stdlib hardware_dma hardware_spi)
 
