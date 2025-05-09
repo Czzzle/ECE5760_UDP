@@ -22,14 +22,14 @@ void drawRect_grid(int x, int y, char color)
 }
 void drawBoundary()
 {
-    // draw boundary and 0,0
-    // Step 0: draw basket as boundary
-    drawLine(0, 0, 320, 0, WHITE);
-    drawLine(320, 0, 320, 240, YELLOW);
-    drawLine(0, 0, 0, 240, BLUE);
-    drawLine(0, 240, 320, 240, RED);
+  // draw boundary and 0,0
+  // Step 0: draw basket as boundary
+  drawLine(0, 0, 320, 0, WHITE);
+  drawLine(320, 0, 320, 240, YELLOW);
+  drawLine(0, 0, 0, 240, BLUE);
+  drawLine(0, 240, 320, 240, RED);
 
-    drawRect(0, 0, 10, 10, WHITE);
+  drawRect(0, 0, 10, 10, WHITE);
 }
 
 // Draw grid with left corner at (x,y)
@@ -69,8 +69,9 @@ void drawGridDim(int grid_x, int grid_y, char gridFill)
     //=============== vertical 1 to 10 ========================
     for (int i = 0; i <= 9; i++)
     {
-        drawChar(x + 8 + i * GRID_SQUARE_SIZE, y - 8, 65 + i, gridFill, BLACK, 1);
+        drawChar(x+8 + i * GRID_SQUARE_SIZE, y - 8, 65 + i, gridFill, BLACK, 1);
     }
+
 }
 
 // draw peg with center at (x,y)
@@ -88,7 +89,7 @@ void drawPegShip(int x, int y)
     int peg_x, peg_y;
     peg_x = LEFT_GRID_X + (x * GRID_SQUARE_SIZE);
     peg_x = peg_x + 0.5 * GRID_SQUARE_SIZE;
-    peg_y = LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
+    peg_y =  LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
     peg_y = peg_y + 0.5 * GRID_SQUARE_SIZE;
 
     drawPEG(peg_x, peg_y, BLACK);
@@ -99,7 +100,7 @@ void drawPegPotentialShip(int x, int y)
     int peg_x, peg_y;
     peg_x = RIGHT_GRID_X + (x * GRID_SQUARE_SIZE);
     peg_x = peg_x + 0.5 * GRID_SQUARE_SIZE;
-    peg_y = RIGHT_GRID_Y + (y * GRID_SQUARE_SIZE);
+    peg_y =  RIGHT_GRID_Y + (y * GRID_SQUARE_SIZE);
     peg_y = peg_y + 0.5 * GRID_SQUARE_SIZE;
 
     drawPEG(peg_x, peg_y, BLACK);
@@ -110,7 +111,7 @@ void drawPegHit(int x, int y)
     int peg_x, peg_y;
     peg_x = LEFT_GRID_X + (x * GRID_SQUARE_SIZE);
     peg_x = peg_x + 0.5 * GRID_SQUARE_SIZE;
-    peg_y = LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
+    peg_y =  LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
     peg_y = peg_y + 0.5 * GRID_SQUARE_SIZE;
 
     drawPEG(peg_x, peg_y, RED);
@@ -121,7 +122,7 @@ void drawPegMiss(int x, int y)
     int peg_x, peg_y;
     peg_x = LEFT_GRID_X + (x * GRID_SQUARE_SIZE);
     peg_x = peg_x + 0.5 * GRID_SQUARE_SIZE;
-    peg_y = LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
+    peg_y =  LEFT_GRID_Y + (y * GRID_SQUARE_SIZE);
     peg_y = peg_y + 0.5 * GRID_SQUARE_SIZE;
 
     drawPEG(peg_x, peg_y, GRAY2);
@@ -210,7 +211,7 @@ void difficultyChoose(char textColor, char optionColor, int selectedOption, int 
 
     if (selectedOption == 0)
     {
-        fillRect(59, SCREEN_HEIGHT / 8 + 139, 55, 17, unselected_bg); // changed to selected later
+        fillRect(59, SCREEN_HEIGHT / 8 + 139, 55, 17, unselected_bg); //changed to selected later
         fillRect(199, SCREEN_HEIGHT / 8 + 139, 55, 17, unselected_bg);
     }
     else
@@ -237,31 +238,31 @@ void difficultyChoose(char textColor, char optionColor, int selectedOption, int 
 void drawCursor(int x, int y, char color)
 {
     drawPixel(x, y, color);
-    drawPixel(x - 1, y, color);
-    drawPixel(x - 2, y, color);
-    drawPixel(x + 1, y, color);
-    drawPixel(x + 2, y, color);
-    drawPixel(x, y - 1, color);
-    drawPixel(x, y - 2, color);
-    drawPixel(x, y + 1, color);
-    drawPixel(x, y + 2, color);
+    drawPixel(x-1, y, color);
+    drawPixel(x-2, y, color);
+    drawPixel(x+1, y, color);
+    drawPixel(x+2, y, color);
+    drawPixel(x, y-1, color);
+    drawPixel(x, y-2, color);
+    drawPixel(x, y+1, color);
+    drawPixel(x, y+2, color);
 }
+
 
 PixelBackup prevPixels[CURSOR_SIZE];
 PixelBackup currPixels[CURSOR_SIZE];
 
 void setDefaultPixels()
 {
-    for (int i = 0; i < CURSOR_SIZE; i++)
-    {
+    for (int i = 0; i < CURSOR_SIZE; i++) {
         prevPixels[i].x = 0;
         prevPixels[i].y = 0;
-        prevPixels[i].color = BLACK; // assume you have this
+        prevPixels[i].color = BLACK;  // assume you have this
     }
 }
 
 void savePrevPixels(fix15 x_fix, fix15 y_fix)
-{
+{   
     int x = fix2int15(x_fix);
     int y = fix2int15(y_fix);
 
@@ -280,7 +281,7 @@ void savePrevPixels(fix15 x_fix, fix15 y_fix)
 }
 
 // void savePrevPixels(fix15 x_fix, fix15 y_fix)
-// {
+// {   
 //     int x = fix2int15(x_fix);
 //     int y = fix2int15(y_fix);
 
@@ -298,26 +299,30 @@ void savePrevPixels(fix15 x_fix, fix15 y_fix)
 //     }
 // }
 
+
+
+
 void moveCursor(fix15 *old_x, fix15 *old_y, fix15 new_x, fix15 new_y, char cursor_color)
 {
-
+    
     // Save pixels under new location
     savePrevPixels(new_x, new_y);
     // for(int i=0;i<CURSOR_SIZE; i++)
     // {
-    //     printf("\nCurrPixel[%d]: x:%d, y:%d, color:%d", i, currPixels[i].x, currPixels[i].y, currPixels[i].color);
+    //     printf("\nCurrPixel[%d]: x:%d, y:%d, color:%d", i, currPixels[i].x, currPixels[i].y, currPixels[i].color);  
     // }
-
+    
+ 
     // Restore previous pixels
-    for (int i = 0; i < CURSOR_SIZE; i++)
-    {
+    for (int i = 0; i < CURSOR_SIZE; i++) {
         // printf("\nPrevPixel[%d]: x:%d, y:%d, color:%d", i, prevPixels[i].x, prevPixels[i].y, prevPixels[i].color);
         drawPixel(prevPixels[i].x, prevPixels[i].y, prevPixels[i].color);
         prevPixels[i].x = currPixels[i].x;
         prevPixels[i].y = currPixels[i].y;
         prevPixels[i].color = currPixels[i].color;
-    }
 
+    } 
+    
     // Draw new cursor
     drawCursor(fix2int15(new_x), fix2int15(new_y), cursor_color);
 
@@ -338,7 +343,7 @@ void moveCursor(fix15 *old_x, fix15 *old_y, fix15 new_x, fix15 new_y, char curso
 //         prevPixels[i].color = currPixels[i].color;
 
 //     }
-
+    
 //     // Save pixels under new location
 //     savePrevPixels(new_x, new_y);
 
@@ -349,31 +354,29 @@ void moveCursor(fix15 *old_x, fix15 *old_y, fix15 new_x, fix15 new_y, char curso
 //     *old_y = new_y;
 // }
 
-bool checkCursorOverStartButton(int x_pos, int y_pos)
-{
-    if (x_pos >= START_BUTTON_X && x_pos <= START_BUTTON_X + START_BUTTON_WIDTH && y_pos >= START_BUTTON_Y && y_pos <= START_BUTTON_Y + START_BUTTON_HEIGHT)
-        return true;
-    else
-        return false;
+
+bool checkCursorOverStartButton(int x_pos, int y_pos) {
+  if (x_pos >= START_BUTTON_X && x_pos <= START_BUTTON_X + START_BUTTON_WIDTH && y_pos >= START_BUTTON_Y && y_pos <= START_BUTTON_Y + START_BUTTON_HEIGHT)
+    return true;
+  else 
+    return false;
 }
 
-uint8_t checkCursorOverLevel(int x_pos, int y_pos)
-{
-    if (x_pos >= EASY_BUTTON_X && x_pos <= EASY_BUTTON_X + START_BUTTON_WIDTH && y_pos >= EASY_BUTTON_Y && y_pos <= EASY_BUTTON_Y + START_BUTTON_HEIGHT)
-        return 1;
-    else if (x_pos >= HARD_BUTTON_X && x_pos <= HARD_BUTTON_X + START_BUTTON_WIDTH && y_pos >= HARD_BUTTON_Y && y_pos <= HARD_BUTTON_Y + START_BUTTON_HEIGHT)
-        return 2;
-    else
-        return 0;
+uint8_t checkCursorOverLevel(int x_pos, int y_pos) {
+  if (x_pos >= EASY_BUTTON_X && x_pos <= EASY_BUTTON_X + START_BUTTON_WIDTH && y_pos >= EASY_BUTTON_Y && y_pos <= EASY_BUTTON_Y + START_BUTTON_HEIGHT)
+    return 1;
+  else  if (x_pos >= HARD_BUTTON_X && x_pos <= HARD_BUTTON_X + START_BUTTON_WIDTH && y_pos >= HARD_BUTTON_Y && y_pos <= HARD_BUTTON_Y + START_BUTTON_HEIGHT)
+    return 2;
+  else
+    return 0;
 }
 
-bool checkCursorOverStartGame(int x_pos, int y_pos)
-{
+bool checkCursorOverStartGame(int x_pos, int y_pos) {
     if (x_pos >= EASY_BUTTON_X && x_pos <= EASY_BUTTON_X + START_BUTTON_WIDTH && y_pos >= EASY_BUTTON_Y && y_pos <= EASY_BUTTON_Y + START_BUTTON_HEIGHT)
-        return true;
+      return true;
     else
-        return false;
-}
+      return false;
+  }
 
 void drawTextforShip(char textColor, char optionColor, int isShow)
 {
@@ -426,36 +429,36 @@ void drawTextforShip(char textColor, char optionColor, int isShow)
     static char option1[50];
     sprintf(option1, "START GAME");
     writeString(option1);
+    
 }
 
-uint8_t checkCursorOverShip(int x_pos, int y_pos)
-{
-    if (x_pos >= RIGHT_GRID_X - 1 && x_pos <= RIGHT_GRID_X - 1 + START_BUTTON_WIDTH &&
-        y_pos >= SHIPLIST_SPACE_Carrier - 1 && y_pos <= SHIPLIST_SPACE_Carrier - 1 + START_BUTTON_HEIGHT / 2)
-        return 1;
-    else if (x_pos >= RIGHT_GRID_X - 1 && x_pos <= RIGHT_GRID_X - 1 + START_BUTTON_WIDTH &&
-             y_pos >= SHIPLIST_SPACE_Battleship - 1 && y_pos <= SHIPLIST_SPACE_Battleship - 1 + START_BUTTON_HEIGHT / 2)
-        return 2;
-    else if (x_pos >= RIGHT_GRID_X - 1 && x_pos <= RIGHT_GRID_X - 1 + START_BUTTON_WIDTH &&
-             y_pos >= SHIPLIST_SPACE_Cruiser - 1 && y_pos <= SHIPLIST_SPACE_Cruiser - 1 + START_BUTTON_HEIGHT / 2)
-        return 3;
-    else if (x_pos >= RIGHT_GRID_X - 1 && x_pos <= RIGHT_GRID_X - 1 + START_BUTTON_WIDTH &&
-             y_pos >= SHIPLIST_SPACE_Submarine - 1 && y_pos <= SHIPLIST_SPACE_Submarine - 1 + START_BUTTON_HEIGHT / 2)
-        return 4;
-    else if (x_pos >= RIGHT_GRID_X - 1 && x_pos <= RIGHT_GRID_X - 1 + START_BUTTON_WIDTH &&
-             y_pos >= SHIPLIST_SPACE_Destroyer - 1 && y_pos <= SHIPLIST_SPACE_Destroyer - 1 + START_BUTTON_HEIGHT / 2)
-        return 5;
-    else if (x_pos >= EASY_BUTTON_X - 1 && x_pos <= EASY_BUTTON_X - 1 + START_BUTTON_WIDTH &&
-             y_pos >= EASY_BUTTON_Y - 1 && y_pos <= EASY_BUTTON_Y - 1 + START_BUTTON_HEIGHT / 2)
-        return 1;
+uint8_t checkCursorOverShip(int x_pos, int y_pos) {
+    if (x_pos >= RIGHT_GRID_X-1 && x_pos <= RIGHT_GRID_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= SHIPLIST_SPACE_Carrier -1 && y_pos <= SHIPLIST_SPACE_Carrier -1 + START_BUTTON_HEIGHT/2)
+      return 1;
+    else if (x_pos >= RIGHT_GRID_X-1 && x_pos <= RIGHT_GRID_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= SHIPLIST_SPACE_Battleship -1 && y_pos <= SHIPLIST_SPACE_Battleship -1 + START_BUTTON_HEIGHT/2)
+      return 2;
+    else if (x_pos >= RIGHT_GRID_X-1 && x_pos <= RIGHT_GRID_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= SHIPLIST_SPACE_Cruiser -1 && y_pos <= SHIPLIST_SPACE_Cruiser -1 + START_BUTTON_HEIGHT/2)
+      return 3;
+    else if (x_pos >= RIGHT_GRID_X-1 && x_pos <= RIGHT_GRID_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= SHIPLIST_SPACE_Submarine -1 && y_pos <= SHIPLIST_SPACE_Submarine -1 + START_BUTTON_HEIGHT/2)
+      return 4;
+    else if (x_pos >= RIGHT_GRID_X-1 && x_pos <= RIGHT_GRID_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= SHIPLIST_SPACE_Destroyer -1 && y_pos <= SHIPLIST_SPACE_Destroyer -1 + START_BUTTON_HEIGHT/2)
+      return 5;
+    else if (x_pos >= EASY_BUTTON_X-1 && x_pos <= EASY_BUTTON_X-1 + START_BUTTON_WIDTH && 
+        y_pos >= EASY_BUTTON_Y -1 && y_pos <= EASY_BUTTON_Y -1 + START_BUTTON_HEIGHT/2)
+      return 1;
     else
-        return 0;
-}
+      return 0;
+  }
 
-void drawBoxforShip(char color, int pos_x, int pos_y, const char *strin)
-{
+void drawBoxforShip(char color, int pos_x, int pos_y, const char* strin)
+{   
     static char shipslist[50];
-    fillRect(pos_x - 1, pos_y - 1, pos_x - 5, 17, color);
+    fillRect(pos_x-1, pos_y-1, pos_x-5, 17, color);
     setCursor(pos_x, pos_y);
     setTextSize(1);
     sprintf(shipslist, strin);
@@ -463,13 +466,13 @@ void drawBoxforShip(char color, int pos_x, int pos_y, const char *strin)
 }
 
 void drawBlackBoxforShip()
-{
-    fillRect(RIGHT_GRID_X - 1, RIGHT_GRID_Y - 1, RIGHT_GRID_X - 5, 17, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Carrier - 1, RIGHT_GRID_X - 5, 17, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Battleship - 1, RIGHT_GRID_X - 5, 17, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Cruiser - 1, RIGHT_GRID_X - 5, 17, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Submarine - 1, RIGHT_GRID_X - 5, 17, BLACK);
-    fillRect(RIGHT_GRID_X - 1, SHIPLIST_SPACE_Destroyer - 1, RIGHT_GRID_X - 5, 17, BLACK);
+{   
+    fillRect(RIGHT_GRID_X-1, RIGHT_GRID_Y-1, RIGHT_GRID_X-5, 17, BLACK);
+    fillRect(RIGHT_GRID_X-1, SHIPLIST_SPACE_Carrier-1, RIGHT_GRID_X-5, 17, BLACK);
+    fillRect(RIGHT_GRID_X-1, SHIPLIST_SPACE_Battleship-1, RIGHT_GRID_X-5, 17, BLACK);
+    fillRect(RIGHT_GRID_X-1, SHIPLIST_SPACE_Cruiser-1, RIGHT_GRID_X-5, 17, BLACK);
+    fillRect(RIGHT_GRID_X-1, SHIPLIST_SPACE_Submarine-1, RIGHT_GRID_X-5, 17, BLACK);
+    fillRect(RIGHT_GRID_X-1, SHIPLIST_SPACE_Destroyer-1, RIGHT_GRID_X-5, 17, BLACK);
 }
 /*
 This function is to display waiting for difficulty selection page.
@@ -514,11 +517,11 @@ void winnerDeclare(char textColor)
     writeString(declare);
     // if (textColor != BLACK)
     // {
-    // imageDraw(120, 110, trophy_xmax, trophy_ymax, trophy_data, true);
+        // imageDraw(120, 110, trophy_xmax, trophy_ymax, trophy_data, true);
     // }
     // else
     // {
-    // imageDraw(120, 110, trophy_xmax, trophy_ymax, trophy_data, false);
+        // imageDraw(120, 110, trophy_xmax, trophy_ymax, trophy_data, false);
     // }
 }
 

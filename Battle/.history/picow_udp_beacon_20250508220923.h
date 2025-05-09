@@ -25,8 +25,8 @@
 
 // Destination port and IP address
 #define UDP_PORT 1234
-#define BEACON_TARGET "172.20.10.3" // after connect to akansha internet //"172.20.10.2"
-// #define BEACON_TARGET "172.20.10.2"
+// #define BEACON_TARGET "172.20.10.3" // after connect to akansha internet //"172.20.10.2"
+#define BEACON_TARGET "172.20.10.2"
 
 // Maximum length of our message
 #define BEACON_MSG_LEN_MAX 127
@@ -47,49 +47,18 @@ struct pt_sem new_message;
 // Semaphore for signaling a msg need to be sent out
 struct pt_sem ready_to_send;
 
+// // Semaphore for signalling the game start (construct commnunicatio btw two PICO)
+// struct pt_sem game_start;
+
 // Other player status
-GAME_STATUS oponent_player = GAME_STATUS::ONGOING; // remove this later
+GAME_STATUS oponent_player;
 GRID_STATE opponent_gridstate;
 Coordinate8 our_shippos;
 
 bool start_game = false;
-bool your_turn = true; // true for player 1 and false for player 2
+bool your_turn = false; // true for player 1 and false for player 2
 bool received_response = false;
-bool received_attack = false; // false for both the players
-
-void encoderCoord(Coordinate8 c, char *out, size_t out_size)
-{
-  if (out == NULL || out_size < 4)
-  {
-    // Defensive: can't encode
-    return;
-  }
-  out[0] = 'A' + c.x;
-  snprintf(out + 1, out_size - 1, "%d", c.y + 1);
-}
-
-// Coordinate8 decodeCoordUDP(const char* msg, int effective_len) {
-//   Coordinate8 coord = { .x = 30, .y = 30 }; // Default invalid
-
-//   if (msg == NULL || effective_len < 3) return coord;
-
-//   // Assume coordinate is at the end of the message
-//   const char* coord_str = msg + effective_len - 3;  // Try last 3 chars
-//   char buffer[4] = {0};
-
-//   if (isdigit(coord_str[1]) && isdigit(coord_str[2])) {
-//       // Case: A10
-//       strncpy(buffer, coord_str, 3);  // 3 chars + null
-//   } else if (isdigit(coord_str[1])) {
-//       // Case: A5
-//       coord_str = msg + effective_len - 2;
-//       strncpy(buffer, coord_str, 2);  // 2 chars + null
-//   } else {
-//       return coord;  // Invalid format
-//   }
-
-//   return decodeCoord(buffer);  // Use your existing function
-// }
+bool received_attack = true; // false for both the players
 
 static void raw_send(GAME_STATUS status, GRID_STATE state, Coordinate8 coord, int sendOption)
 {
@@ -109,6 +78,7 @@ static void raw_send(GAME_STATUS status, GRID_STATE state, Coordinate8 coord, in
     case GAME_STATUS::PLACE:
       strcpy(send_data, "GAMEPLACE");
       break;
+
     case GAME_STATUS::ONGOING:
       strcpy(send_data, "GAMEONGOING");
       break;
@@ -144,53 +114,50 @@ static void raw_send(GAME_STATUS status, GRID_STATE state, Coordinate8 coord, in
 
   case 3:
     // send coord (need to encode form coordinates8 to char*)
-    char out[4];
-    encoderCoord(coord, out, sizeof(out));
-    printf("\nsending data out:%s", out);
+    char *out;
+    encodeCoord(coord, out);
     strcpy(send_data, out);
   }
+
   PT_SEM_SAFE_SIGNAL(pt, &ready_to_send); // send sephmore
 }
 
-// ===================================
-// DECODE MESSAGE
-// ===================================
-
 void decodeComingMsg(char received_data[], int effective_len)
 {
-  printf("\nReceiveddata: %s", received_data);
-  // printf("\neffective: %d",effective_len);
-  int length_string = strlen(received_data);
-  // printf("\nReceiveddata Length: %d",length_string);
-  // for(int i=0;i<length_string;i++)
-  // {
-  //   printf("Received_data[%d]: %c",i,received_data[i]);
-  // }
-  if (length_string <= 18 && length_string > 16)
+  printf("\nReceiveddata%s", received_data);
+  if (effective_len <= 16 && effective_len > 14)
   {
-    if (length_string == 17)
+    // printf("\nCoordinate Decoder");
+    // we know received data is  coordinate, we need to check hit or miss
+    // decode "A1" style coordinate
+    // check the hit or miss
+    // send back hit or miss msg
+    if (effective_len == 15)
     {
       char coord_str[3];                // 2 characters + null
-      coord_str[0] = received_data[13]; // 14th character (index 13)
-      coord_str[1] = received_data[14]; // 15th character (index 14)
+      coord_str[0] = received_data[14]; // 14th character (index 13)
+      coord_str[1] = received_data[15]; // 15th character (index 14)
       coord_str[2] = '\0';              // null terminator
-      printf("\nCoord_Str1: %s", coord_str);
+
       our_shippos = decodeCoord(coord_str);
     }
-    else if (length_string == 18)
+    else if (effective_len == 16)
     {
       char coord_str[4]; // 2 characters + null
-      coord_str[0] = received_data[13];
-      coord_str[1] = received_data[14]; // 14th character (index 13)
-      coord_str[2] = received_data[15]; // 15th character (index 14)
+      coord_str[0] = received_data[14];
+      coord_str[1] = received_data[15]; // 14th character (index 13)
+      coord_str[2] = received_data[16]; // 15th character (index 14)
       coord_str[3] = '\0';              // null terminator
-      printf("\nCoord_Str2: %s", coord_str);
+
       our_shippos = decodeCoord(coord_str);
     }
     printf("Decode msg: coordinate: x = %d, y%d\n", our_shippos.x, our_shippos.y);
   }
   else if (strstr(received_data, "GAME") != NULL)
   {
+    // printf("\nReceived Data is Game type");
+    // record other player's game status
+    // char *status = received_data + 4;
     if (strstr(received_data, "INITIAL") != NULL)
     {
       oponent_player = GAME_STATUS::INITIAL;
@@ -220,10 +187,10 @@ void decodeComingMsg(char received_data[], int effective_len)
       // LOSE
       oponent_player = GAME_STATUS::LOSE;
     }
-    printf("\nOpponent_player: %d", oponent_player);
   }
   else if (strstr(received_data, "GRID") != NULL)
   {
+    const char *state = received_data + 4;
     if (strstr(received_data, "REPEAT") != NULL)
     {
       opponent_gridstate = GRID_STATE::REPEAT;
@@ -243,22 +210,18 @@ void decodeComingMsg(char received_data[], int effective_len)
     {
       printf("\nInvalid grid value");
     }
-    printf("\nopponent_gridstate: %d", opponent_gridstate);
   }
   else
   {
     printf("\nInvalid attack sequence");
-    // Coordinate8 posnx;
-    // posnx.x = 30;
-    // posnx.y = 30;
-    // raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, posnx, 2);
-    // raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, posnx, 1);
+    Coordinate8 posnx;
+    posnx.x = 30;
+    posnx.y = 30;
+    raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, posnx, 2);
+    raw_send(GAME_STATUS::ONGOING, GRID_STATE::REPEAT, posnx, 1);
   }
 }
 
-// ===================================
-// UDP ECHO RAW INIT
-// ===================================
 // void udpecho_raw_init(void);
 static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
                              const ip_addr_t *addr, u16_t port)
@@ -270,7 +233,7 @@ static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
   {
     // Copy the contents of the payload
     effective_len = p->len;
-    // printf("length of msg %d\n", effective_len);
+    printf("length of msg %d\n", effective_len);
     // memcpy(received_data, p->payload, BEACON_MSG_LEN_MAX); // this line will copy all payload into received_data
     memcpy(received_data, p->payload, effective_len); // this line will copy effective payload into received_data
     // Semaphore-signal a thread
@@ -284,20 +247,22 @@ static void udpecho_raw_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
     printf("NULL pt in callback");
 }
 
+/*
+This function can be called to send three kinds of information:
+sendOption = 1 ==> GAME_STAUS
+sendOption = 2 ==> GRID_STATE
+sendOption = 3 ==> coord
+*/
+
 static void raw_send_test()
 {
   sleep_ms(4000);
-  strcpy(send_data, "A10");
+  strcpy(send_data, "HELLO");
   printf("%s", send_data);
   PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
 
   sleep_ms(1000);
-  strcpy(send_data, "GAMEONGOING");
-  printf("%s", send_data);
-  PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
-
-  sleep_ms(1000);
-  strcpy(send_data, "GRIDMISS");
+  strcpy(send_data, "YEAH");
   printf("%s", send_data);
   PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
 }
@@ -307,8 +272,10 @@ static void raw_send_test()
 // ===================================
 void udpecho_raw_init(void)
 {
+
   // Initialize the RX protocol control block
   udp_rx_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+
   // Make certain that the pcb has initialized, else print a message
   if (udp_rx_pcb != NULL)
   {
@@ -373,7 +340,7 @@ static PT_THREAD(protothread_send(struct pt *pt))
     // Send the UDP packet
     err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
 
-    printf("\nSend UDP packet");
+    printf("Send UDP packet");
 
     // Free the PBUF
     pbuf_free(p);
@@ -381,7 +348,7 @@ static PT_THREAD(protothread_send(struct pt *pt))
     // Check for errors
     if (er != ERR_OK)
     {
-      printf("\nFailed to send UDP packet! error=%d", er);
+      printf("Failed to send UDP packet! error=%d", er);
     }
     // PT_SEM_SAFE_SIGNAL(pt, &ready_to_send);
   }

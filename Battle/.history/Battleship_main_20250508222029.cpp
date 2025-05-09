@@ -118,8 +118,8 @@ Coordinate8 isInOtherGRID(int x_pos, int y_pos)
   if (x_pos >= RIGHT_GRID_X && x_pos < grid_end_x &&
       y_pos >= RIGHT_GRID_Y && y_pos < grid_end_y)
   {
-    // coord.x = (x_pos - RIGHT_GRID_X) / GRID_SQUARE_SIZE; //Chengle's version
-    coord.x = (x_pos - RIGHT_GRID_X) / GRID_SQUARE_SIZE - 26; //diksh's version
+    coord.x = (x_pos - RIGHT_GRID_X) / GRID_SQUARE_SIZE;
+    coord.x = (x_pos - RIGHT_GRID_X) / GRID_SQUARE_SIZE - 26;
     coord.y = (y_pos - RIGHT_GRID_Y) / GRID_SQUARE_SIZE;
   }
   else

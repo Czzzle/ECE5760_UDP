@@ -79,7 +79,6 @@ void drawGRID(int Num, int x, int y, char outlineColor, char gridFill);
 void drawGridDim(int grid_x, int grid_y, char gridFill);
 void drawPEG(int x, int y, char color);
 void drawPegShip(int x, int y);
-void drawPegPotentialShip(int x, int y);
 void drawTextforShip(char textColor, char optionColor, int isShow);
 void drawBoxforShip(char color, int pos_x, int pos_y, const char* strin);
 void drawBlackBoxforShip();
